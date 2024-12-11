@@ -1,29 +1,27 @@
 version: 0.2
-
+ 
 phases:
   install:
+    runtime-versions:
+      python: 3.9
     commands:
-      - echo "Installing dependencies..."
-      - yum install -y docker
-
-  pre_build:
-    commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 034362045846418.dkr.ecr.us-east-1.amazonaws.com.dkr.ecr.us-east-1.amazonaws.com
-
+      - echo Installing dependencies...
+      - pip install -r requirements.txt
   build:
     commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 034362045846.dkr.ecr.us-east-1.amazonaws.com)
       - echo Building the Docker image...
       - docker build -t rupanshi-flask-app .
-      - docker tag rupanshi-flask-app:latest       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 034362045846418.dkr.ecr.us-east-1.amazonaws.com.dkr.ecr.us-east-1.amazonaws.com/rupanshi-flask-app:latest
-      - docker push       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 034362045846418.dkr.ecr.us-east-1.amazonaws.com.dkr.ecr.us-east-1.amazonaws.com/rupanshi-flask-app:latest
-
-  post_build:
-    commands:
-      - echo Creating imagedefinitions.json...
-      - printf '[{"name":"flask-app","imageUri":"      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 034362045846418.dkr.ecr.us-east-1.amazonaws.com.dkr.ecr.us-east-1.amazonaws.com/rupanshi-flask-app:latest"}]' > imagedefinitions.json
-
+      - echo Tagging the Docker image...
+      - docker tag rupanshi-flask-app:latest 034362045846.dkr.ecr.us-east-1.amazonaws.com/rupanshi-flask-app:latest
+      - echo Pushing the Docker image to Amazon ECR...
+      - docker push 034362045846.dkr.ecr.us-east-1.amazonaws.com/rupanshi-flask-app:latest
+      - echo Creating imageDefinitions.json for ECS deployment...
+      - echo '[{"name":"rupanshi-flask-app","imageUri":"034362045846.dkr.ecr.us-east-1.amazonaws.com/rupanshi-flask-app:latest"}]' > imageDefinitions.json
 artifacts:
   files:
-    - '**/*'                 # Include all files in the current directory
-    - imagedefinitions.json   # Explicitly include the imagedefinitions.json file
+    - app.py
+    - requirements.txt
+    - imageDefinitions.json
+ 
